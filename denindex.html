@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Comparison Pro - Custom</title>
+    <style>
+        :root { 
+            --app-bg: #1a1a1a;
+            --list-bg: #e3f2fd; 
+            --header-mist: #f5f5f5; 
+            --key-num: #d4d4d4; 
+            --key-op: #666666;  
+            --active-gold: #ffd700;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
+        body { margin: 0; background: var(--app-bg); font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; color: white; }
+        .app-container { display: flex; height: 100vh; padding: 6px; gap: 8px; }
+        
+        /* 計算欄 */
+        .lists-view-port { flex: 3; overflow: hidden; position: relative; border-radius: 12px; background: var(--list-bg); transition: 0.3s; }
+        .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 2px; }
+        .list-column { display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.1); flex: 1; min-width: 0; }
+        .total-display { height: 40px; color: #000; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 1rem; font-weight: 900; background: var(--header-mist); border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .history-area { flex-grow: 1; display: flex; flex-direction: column; }
+        .history-item { flex: 1; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-right: 6px; color: #000; font-size: 0.8rem; font-weight: 700; position: relative; }
+        .selected-row { background: #fff9c4 !important; }
+        .p-mark { font-size: 0.6rem; color: #e64a19; border: 1px solid #e64a19; border-radius: 2px; padding: 0 1px; margin-right: 2px; }
+        .memo-text { font-size: 0.6rem; color: #0288d1; position: absolute; left: 4px; top: 2px; }
+        .rate-label { font-size: 0.5rem; color: #666; }
+
+        /* キーパッド */
+        .keypad-container { flex: 2.2; display: flex; flex-direction: column; gap: 6px; }
+        .top-row { display: flex; gap: 4px; }
+        .icon-btn { flex: 1; height: 45px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #444; color: white; font-size: 0.9rem; }
+        
+        /* 還元ボード */
+        .reward-board { background: white; color: black; border-radius: 8px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; min-height: 70px; }
+        .reward-col { font-size: 0.65rem; border-right: 1px solid #eee; display: flex; flex-direction: column; align-items: center; }
+        .reward-col:last-child { border-right: none; }
+        .reward-val { font-weight: 900; color: #e64a19; }
+
+        .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+        .key { border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 40px; }
+        .num-key { background: var(--key-num); color: #333; }
+        .op-key { background: var(--key-op); color: white; }
+
+        /* 設定パネル */
+        .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; padding: 20px; }
+        .modal-content { background: #333; border-radius: 12px; padding: 15px; }
+        .color-dot { width: 35px; height: 35px; border-radius: 50%; margin: 5px; cursor: pointer; border: 2px solid #fff; }
+        .rate-btn { background: #555; color: white; border: none; padding: 8px; margin: 3px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="lists-view-port">
+        <div class="lists-scroll-container" id="scrollContainer"></div>
+        <button class="icon-btn" style="position:absolute; top:4px; right:4px; width:35px; height:35px; z-index:100; background:#607d8b;" onclick="toggleSettings(true)">⚙</button>
+    </div>
+
+    <div class="keypad-container">
+        <div class="top-row">
+            <button class="icon-btn" style="background:#ffab91" onclick="togglePointMode()" id="p-btn">P</button>
+            <button class="icon-btn" style="background:#b9fbc0" onclick="inputMemo()">🔍</button>
+            <button class="icon-btn" style="background:#cfd8dc" onclick="toggle4Col()">4連</button>
+            <button class="icon-btn" style="background:#81d4fa" onclick="toggleYoko()" id="yoko-btn">横</button>
+        </div>
+        
+        <div class="reward-board" id="rewardBoard"></div>
+
+        <div class="grid-keys">
+            <button class="key num-key" onclick="num(7)">7</button><button class="key num-key" onclick="num(8)">8</button><button class="key num-key" onclick="num(9)">9</button><button class="key op-key" onclick="back()">BS</button>
+            <button class="key num-key" onclick="num(4)">4</button><button class="key num-key" onclick="num(5)">5</button><button class="key num-key" onclick="num(6)">6</button><button class="key op-key" onclick="multiply()">×</button>
+            <button class="key num-key" onclick="num(1)">1</button><button class="key num-key" onclick="num(2)">2</button><button class="key num-key" onclick="num(3)">3</button><button class="key op-key" onclick="calcPercent()">%</button>
+            <button class="key num-key" onclick="num(0)">0</button><button class="key num-key" onclick="num('00')">00</button><button class="key op-key" onclick="setOp('+')">+</button><button class="key op-key" onclick="setOp('-')">-</button>
+            <button class="key op-key" style="grid-column: span 2;" onclick="masterClear()">AC</button>
+            <button class="key op-key" style="grid-column: span 2;" onclick="columnClear()">列消去</button>
+        </div>
+    </div>
+</div>
+
+<div id="settings-panel" class="settings-panel">
+    <div class="modal-content">
+        <h3 style="margin:0 0 10px 0;">カラー設定</h3>
+        <div style="display:flex; flex-wrap:wrap;">
+            <div class="color-dot" style="background:#fce4ec;" onclick="changeColor('#fce4ec')"></div>
+            <div class="color-dot" style="background:#e8f5e9;" onclick="changeColor('#e8f5e9')"></div>
+            <div class="color-dot" style="background:#e3f2fd;" onclick="changeColor('#e3f2fd')"></div>
+            <div class="color-dot" style="background:#ffffff;" onclick="changeColor('#ffffff')"></div>
+        </div>
+        <h3 style="margin:20px 0 10px 0;">還元率設定（選択中のマスに適用）</h3>
+        <div id="rate-options"></div>
+        <button class="icon-btn" style="width:100%; margin-top:20px;" onclick="toggleSettings(false)">閉じる</button>
+    </div>
+</div>
+
+<script>
+    let activeIdx = 0, selectedRowIdx = 0;
+    let isHorizontal = false, is4Col = false, isPointMode = false;
+    const ROW_COUNT = 15;
+    let data = Array.from({length: 4}, () => Array.from({length: ROW_COUNT}, () => ({val: 0, isP: false, memo: "", rate: 10})));
+
+    function init() {
+        renderColumns();
+        const rates = [1, 3, 5, 7, 10, 15, 20];
+        const opt = document.getElementById('rate-options');
+        rates.forEach(r => {
+            const b = document.createElement('button');
+            b.className = 'rate-btn';
+            b.innerText = r + '%';
+            b.onclick = () => { data[activeIdx][selectedRowIdx].rate = r; render(); };
+            opt.appendChild(b);
+        });
+    }
+
+    function renderColumns() {
+        const container = document.getElementById('scrollContainer');
+        container.innerHTML = '';
+        const colCount = is4Col ? 4 : 3;
+        for(let i=0; i < colCount; i++) {
+            const col = document.createElement('div');
+            col.className = 'list-column';
+            col.innerHTML = `<div class="total-display" id="total-${i}">0</div><div class="history-area">${data[i].map((_, j) => `<div class="history-item" id="cell-${i}-${j}" onclick="selectCell(${i},${j})"></div>`).join('')}</div>`;
+            container.appendChild(col);
+        }
+        render();
+    }
+
+    function render() {
+        const board = document.getElementById('rewardBoard');
+        board.innerHTML = '';
+        data.forEach((list, i) => {
+            if(i >= (is4Col ? 4 : 3)) return;
+            // 合計計算
+            const total = list.reduce((sum, item) => item.isP ? sum : sum + item.val, 0);
+            document.getElementById(`total-${i}`).innerText = total.toLocaleString();
+
+            // 還元ボード更新
+            const currentItem = list[selectedRowIdx];
+            const cashPoint = Math.floor(currentItem.val * (currentItem.rate / 100));
+            const cardRate = Math.max(0, currentItem.rate - 2);
+            const cardPoint = Math.floor(currentItem.val * (cardRate / 100));
+            board.innerHTML += `<div class="reward-col"><div>${i+1}連(${currentItem.rate}%)</div><div class="reward-val">${cashPoint}</div><div>C(${cardRate}%):${cardPoint}</div></div>`;
+
+            list.forEach((item, j) => {
+                const el = document.getElementById(`cell-${i}-${j}`);
+                if (el) {
+                    let html = `<div class="memo-text">${item.memo}</div>`;
+                    let valStr = item.val === 0 ? "" : item.val.toLocaleString();
+                    if(item.isP && item.val !== 0) valStr = `<span class="p-mark">P</span>` + valStr;
+                    html += `<div>${valStr}</div><div class="rate-label">${item.val !== 0 ? item.rate+'%' : ''}</div>`;
+                    el.innerHTML = html;
+                    el.style.color = item.val < 0 ? "#d32f2f" : "#000";
+                    el.classList.toggle('selected-row', (i === activeIdx && j === selectedRowIdx));
+                }
+            });
+        });
+    }
+
+    function num(n) {
+        const up = (idx) => {
+            let target = data[idx][selectedRowIdx];
+            let s = Math.abs(target.val).toString();
+            target.val = (parseInt((s === "0" ? "" : s) + n) || 0) * (target.val < 0 ? -1 : 1);
+            target.isP = isPointMode;
+        };
+        if(isHorizontal) {
+            for(let i = activeIdx; i < (is4Col ? 4 : 3); i++) up(i);
+        } else { up(activeIdx); }
+        render();
+    }
+
+    function inputMemo() {
+        const m = prompt("メモを入力", data[activeIdx][selectedRowIdx].memo);
+        if(m !== null) {
+            data[activeIdx][selectedRowIdx].memo = m;
+            render();
+        }
+    }
+
+    function toggle4Col() {
+        is4Col = !is4Col;
+        data.forEach(l => l.forEach(item => { item.val = 0; item.isP = false; item.memo = ""; }));
+        selectedRowIdx = 0;
+        renderColumns();
+    }
+
+    function toggleYoko() {
+        isHorizontal = !isHorizontal;
+        document.getElementById('yoko-btn').style.background = isHorizontal ? "var(--active-gold)" : "#444";
+        document.getElementById('yoko-btn').style.color = isHorizontal ? "#000" : "#fff";
+    }
+
+    function togglePointMode() {
+        isPointMode = !isPointMode;
+        document.getElementById('p-btn').style.border = isPointMode ? "2px solid #e64a19" : "none";
+    }
+
+    function changeColor(c) { document.documentElement.style.setProperty('--list-bg', c); }
+    function toggleSettings(s) { document.getElementById('settings-panel').style.display = s ? 'block' : 'none'; }
+    function selectCell(l, r) { activeIdx = l; selectedRowIdx = r; render(); }
+    function back() { 
+        const b = (idx) => {
+            let s = Math.abs(data[idx][selectedRowIdx].val).toString();
+            data[idx][selectedRowIdx].val = (parseInt(s.slice(0, -1)) || 0) * (data[idx][selectedRowIdx].val < 0 ? -1 : 1);
+        };
+        if(isHorizontal) { for(let i=activeIdx; i<4; i++) b(i); } else { b(activeIdx); } render();
+    }
+    function multiply() { const v = prompt("掛ける数を入力"); if(v) { data[activeIdx][selectedRowIdx].val *= parseFloat(v); render(); } }
+    function calcPercent() { const v = prompt("パーセントを入力(例: 10)"); if(v) { data[activeIdx][selectedRowIdx].val *= (parseFloat(v)/100); render(); } }
+    function setOp(op) { 
+        const s = (idx) => data[idx][selectedRowIdx].val = Math.abs(data[idx][selectedRowIdx].val) * (op === '-' ? -1 : 1);
+        if(isHorizontal) { for(let i=activeIdx; i<4; i++) s(i); } else { s(activeIdx); } render(); 
+    }
+    function masterClear() { if(confirm("全消去？")) { data.forEach(l => l.forEach(item => {item.val=0; item.isP=false; item.memo="";})); render(); } }
+    function columnClear() { data[activeIdx].forEach(item => {item.val=0; item.isP=false; item.memo="";}); render(); }
+
+    init();
+</script>
+</body>
+</html>
