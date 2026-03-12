@@ -7,11 +7,11 @@
     <style>
         :root { 
             --app-bg: #1a1a1a;
-            --list-bg: #e3f2fd; 
+            --list-bg: #f7f9f9; 
             --header-mist: #ffffff; 
             --key-num: #efefef; 
             --key-op: #555555;  
-            --active-gold: #fff9c4;
+            --active-gold: #fff59d;
             --btn-radius: 6px;
         }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
@@ -24,32 +24,34 @@
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
         .total-display { height: 45px; color: #000; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 1.1rem; font-weight: 900; background: var(--header-mist); border-bottom: 2px solid rgba(0,0,0,0.1); }
         .history-area { flex-grow: 1; display: flex; flex-direction: column; }
-        .history-item { flex: 1; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-right: 6px; color: #000; font-size: 0.9rem; font-weight: 700; position: relative; }
+        .history-item { flex: 1; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-right: 6px; color: #222; font-size: 0.9rem; font-weight: 700; position: relative; }
         .selected-row { background: var(--active-gold) !important; }
-        .p-mark { font-size: 0.6rem; color: #d32f2f; border: 1px solid #d32f2f; border-radius: 2px; padding: 0 1px; margin-right: 2px; }
+        .p-mark { font-size: 0.6rem; color: #fff; background: #000; border-radius: 2px; padding: 0 2px; margin-right: 2px; }
         .memo-text { font-size: 0.65rem; color: #1565c0; position: absolute; left: 4px; top: 2px; font-weight: normal; }
 
-        /* 右側パネル ここ複雑だから再度確認するよう*/
+        /* 全画面時の戻るボタンここ間違えてないか最終確認 */
+        #exit-fs-btn { position: fixed; bottom: 20px; right: 20px; z-index: 6000; background: #f44336; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* 右側パネル */
         .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        
-        /* 2段の上部ボタン歯車の位置や機能漏れないように */
         .control-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .icon-btn { height: 55px; border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.85rem; }
+        .icon-btn { height: 50px; border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 1.2rem; }
         
-        /* 還元ボード（数字のみ） */
-        .reward-board { background: #e1f5fe; color: #01579b; border-radius: 6px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; border: 1px solid #b3e5fc; height: 60px; }
+        /* 還元ボード */
+        .reward-board { background: #e1f5fe; color: #01579b; border-radius: 6px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; border: 1px solid #b3e5fc; height: 75px; }
         .reward-col { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #b3e5fc; }
         .reward-col:last-child { border-right: none; }
-        .reward-val { font-weight: 900; color: #e65100; font-size: 0.9rem; }
-        .reward-card { font-size: 0.6rem; color: #0277bd; }
+        .reward-total { font-size: 0.75rem; font-weight: 900; color: #d32f2f; margin-bottom: 2px; }
+        .reward-val { font-weight: 900; color: #e65100; font-size: 0.85rem; }
+        .reward-card { font-size: 0.55rem; color: #0277bd; }
 
         .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; flex-grow: 1; }
-        .key { border: none; border-radius: var(--btn-radius); font-size: 1.4rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .key { border: none; border-radius: var(--btn-radius); font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .num-key { background: var(--key-num); color: #333; }
         .op-key { background: var(--key-op); color: white; }
 
         .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .clear-key { height: 65px; background: #607d8b; color: white; border: none; border-radius: var(--btn-radius); font-weight: bold; font-size: 1.1rem; }
+        .clear-key { height: 60px; background: #607d8b; color: white; border: none; border-radius: var(--btn-radius); font-weight: bold; font-size: 1.1rem; }
 
         /* 設定パネル */
         .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; padding: 20px; }
@@ -63,20 +65,21 @@
 <body>
 
 <div class="app-container">
-    <div class="lists-view-port">
+    <div class="lists-view-port" id="mainView">
         <div class="lists-scroll-container" id="scrollContainer"></div>
+        <button id="exit-fs-btn" onclick="toggleFullscreen()">戻る</button>
     </div>
 
-    <div class="keypad-container">
+    <div class="keypad-container" id="keypad">
         <div class="control-grid">
-            <button class="icon-btn" style="background:#546e7a" onclick="toggleSettings(true)">⚙ 歯車</button>
-            <button class="icon-btn" style="background:#4db6ac" onclick="inputMemo()">🔍 検索</button>
-            <button class="icon-btn" style="background:#ff8a65" onclick="togglePointMode()" id="p-btn">ポイント</button>
+            <button class="icon-btn" style="background:#546e7a" onclick="toggleSettings(true)">⚙</button>
+            <button class="icon-btn" style="background:#4db6ac" onclick="inputMemo()">🔍</button>
+            <button class="icon-btn" style="background:#000; color:#fff;" onclick="togglePointMode()" id="p-btn">P</button>
         </div>
         <div class="control-grid">
-            <button class="icon-btn" style="background:#64b5f6" onclick="toggleYoko()" id="yoko-btn">横計算</button>
-            <button class="icon-btn" style="background:#9575cd" onclick="toggle4Col()">4連電卓</button>
-            <button class="icon-btn" style="background:#90a4ae" onclick="toggleFullscreen()">全画面</button>
+            <button class="icon-btn" style="background:#64b5f6; font-size:0.85rem;" onclick="toggleYoko()" id="yoko-btn">横計算</button>
+            <button class="icon-btn" style="background:#9575cd; font-size:0.85rem;" onclick="toggle4Col()">4連電卓</button>
+            <button class="icon-btn" style="background:#90a4ae; font-size:0.85rem;" onclick="toggleFullscreen()">全画面</button>
         </div>
 
         <div class="grid-keys">
@@ -109,10 +112,11 @@
     let activeIdx = 0, selectedRowIdx = 0;
     let isHorizontal = false, is4Col = false, isPointMode = false;
     const ROW_COUNT = 15;
-    let data = Array.from({length: 4}, () => Array.from({length: ROW_COUNT}, () => ({val: 0, isP: false, memo: "", rate: 10})));
+    // 還元率のデフォルトを0に設定
+    let data = Array.from({length: 4}, () => Array.from({length: ROW_COUNT}, () => ({val: 0, isP: false, memo: "", rate: 0})));
 
     const colors = [
-        '#e3f2fd', '#fce4ec', '#e8f5e9', '#fff3e0', '#f3e5f5', 
+        '#f7f9f9', '#e3f2fd', '#fce4ec', '#e8f5e9', '#fff3e0', 
         '#ffffff', '#f5f5f5', '#e0f2f1', '#fffde7', '#d1c4e9'
     ];
 
@@ -127,11 +131,22 @@
             cGrid.appendChild(d);
         });
         const rGrid = document.getElementById('rateOptions');
-        [1, 3, 5, 7, 8, 10, 15, 20].forEach(r => {
+        // 0%をデフォルト追加
+        [0, 1, 3, 5, 8, 10, 15, 20].forEach(r => {
             const b = document.createElement('button');
             b.className = 'rate-btn';
             b.innerText = r + '%';
-            b.onclick = () => { data[activeIdx][selectedRowIdx].rate = r; render(); };
+            b.onclick = () => { 
+                data[activeIdx][selectedRowIdx].rate = r; 
+                // 横計算時は右側にも適用
+                if(isHorizontal) {
+                    const colCount = is4Col ? 4 : 3;
+                    for(let i = activeIdx + 1; i < colCount; i++) {
+                        data[i][selectedRowIdx].rate = r;
+                    }
+                }
+                render(); 
+            };
             rGrid.appendChild(b);
         });
     }
@@ -157,15 +172,22 @@
         for(let i=0; i < colCount; i++) {
             const list = data[i];
             const total = list.reduce((sum, item) => item.isP ? sum : sum + item.val, 0);
+            
+            // 全体還元額の計算
+            const totalCashReward = list.reduce((sum, item) => sum + Math.floor(item.val * (item.rate / 100)), 0);
+            const totalCardReward = list.reduce((sum, item) => sum + Math.floor(item.val * (Math.max(0, item.rate - 2) / 100)), 0);
+
             document.getElementById(`total-${i}`).innerText = total.toLocaleString();
 
             const cur = list[selectedRowIdx];
             const cashP = Math.floor(cur.val * (cur.rate / 100));
             const cardR = Math.max(0, cur.rate - 2);
             const cardP = Math.floor(cur.val * (cardR / 100));
+            
             board.innerHTML += `<div class="reward-col">
+                <div class="reward-total">${totalCashReward.toLocaleString()}</div>
                 <div class="reward-val">${cashP}</div>
-                <div class="reward-card">${cardP}</div>
+                <div class="reward-card">💳${cardP} (計${totalCardReward})</div>
             </div>`;
 
             list.forEach((item, j) => {
@@ -175,7 +197,7 @@
                     let valStr = item.val === 0 ? "" : item.val.toLocaleString();
                     if(item.isP && item.val !== 0) valStr = `<span class="p-mark">P</span>` + valStr;
                     html += `<div>${valStr}</div>`;
-                    if(item.val !== 0) html += `<div style="font-size:0.5rem; color:#999;">${item.rate}%</div>`;
+                    if(item.val !== 0) html += `<div style="font-size:0.5rem; color:#888;">${item.rate}%</div>`;
                     el.innerHTML = html;
                     el.classList.toggle('selected-row', (i === activeIdx && j === selectedRowIdx));
                 }
@@ -189,6 +211,10 @@
             let s = Math.abs(target.val).toString();
             target.val = (parseInt((s === "0" ? "" : s) + n) || 0) * (target.val < 0 ? -1 : 1);
             target.isP = isPointMode;
+            // 横計算時は還元率もコピーする
+            if(isHorizontal && idx > activeIdx) {
+                target.rate = data[activeIdx][selectedRowIdx].rate;
+            }
         };
         if(isHorizontal) { for(let i = activeIdx; i < (is4Col?4:3); i++) up(i); } else { up(activeIdx); }
         render();
@@ -196,18 +222,33 @@
 
     function selectCell(l, r) { activeIdx = l; selectedRowIdx = r; render(); }
     function inputMemo() { const m = prompt("ラベルを入力", data[activeIdx][selectedRowIdx].memo); if(m !== null) { data[activeIdx][selectedRowIdx].memo = m; render(); } }
-    function toggle4Col() { is4Col = !is4Col; data.forEach(l => l.forEach(item => { item.val = 0; item.isP = false; item.memo = ""; })); selectedRowIdx = 0; renderColumns(); }
+    function toggle4Col() { is4Col = !is4Col; data.forEach(l => l.forEach(item => { item.val = 0; item.isP = false; item.memo = ""; item.rate = 0; })); selectedRowIdx = 0; renderColumns(); }
     function toggleYoko() { isHorizontal = !isHorizontal; document.getElementById('yoko-btn').style.background = isHorizontal ? "#ffd700" : "#64b5f6"; document.getElementById('yoko-btn').style.color = isHorizontal ? "#000" : "#fff"; }
-    function togglePointMode() { isPointMode = !isPointMode; document.getElementById('p-btn').style.border = isPointMode ? "2px solid #b71c1c" : "none"; }
+    function togglePointMode() { isPointMode = !isPointMode; document.getElementById('p-btn').style.border = isPointMode ? "2px solid #fff" : "none"; }
     function changeColor(c) { document.documentElement.style.setProperty('--list-bg', c); }
     function toggleSettings(s) { document.getElementById('settings-panel').style.display = s ? 'flex' : 'none'; }
-    function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { document.exitFullscreen(); } }
+    
+    function toggleFullscreen() {
+        const keypad = document.getElementById('keypad');
+        const exitBtn = document.getElementById('exit-fs-btn');
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().then(() => {
+                keypad.style.display = 'none';
+                exitBtn.style.display = 'block';
+            });
+        } else {
+            document.exitFullscreen();
+            keypad.style.display = 'flex';
+            exitBtn.style.display = 'none';
+        }
+    }
+
     function back() { const b = (idx) => { let s = Math.abs(data[idx][selectedRowIdx].val).toString(); data[idx][selectedRowIdx].val = (parseInt(s.slice(0, -1)) || 0) * (data[idx][selectedRowIdx].val < 0 ? -1 : 1); }; if(isHorizontal) { for(let i=activeIdx; i<(is4Col?4:3); i++) b(i); } else { b(activeIdx); } render(); }
     function multiply() { const v = prompt("掛ける数"); if(v) { data[activeIdx][selectedRowIdx].val *= parseFloat(v); render(); } }
     function calcPercent() { const v = prompt("パーセント(%)"); if(v) { data[activeIdx][selectedRowIdx].val *= (parseFloat(v)/100); render(); } }
     function setOp(op) { const s = (idx) => data[idx][selectedRowIdx].val = Math.abs(data[idx][selectedRowIdx].val) * (op === '-' ? -1 : 1); if(isHorizontal) { for(let i=activeIdx; i<(is4Col?4:3); i++) s(i); } else { s(activeIdx); } render(); }
-    function masterClear() { if(confirm("全消去しますか？")) { data.forEach(l => l.forEach(item => {item.val=0; item.isP=false; item.memo="";})); render(); } }
-    function columnClear() { data[activeIdx].forEach(item => {item.val=0; item.isP=false; item.memo="";}); render(); }
+    function masterClear() { if(confirm("全消去しますか？")) { data.forEach(l => l.forEach(item => {item.val=0; item.isP=false; item.memo=""; item.rate=0;})); render(); } }
+    function columnClear() { data[activeIdx].forEach(item => {item.val=0; item.isP=false; item.memo=""; item.rate=0;}); render(); }
 
     init();
 </script>
