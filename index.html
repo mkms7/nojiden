@@ -18,7 +18,7 @@
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; height: 100vh; overflow: hidden; color: white; }
         .app-container { display: flex; height: 100vh; padding: 8px; gap: 10px; }
         
-        /* 計算欄 */
+        /* 計算欄ここは無視でおけ */
         .lists-view-port { flex: 1.1; overflow: hidden; position: relative; border-radius: 8px; background: var(--list-bg); transition: 0.3s; }
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
@@ -29,21 +29,21 @@
         .p-mark { font-size: 0.6rem; color: #fff; background: #000; border-radius: 2px; padding: 0 2px; margin-right: 2px; }
         .memo-text { font-size: 0.65rem; color: #1565c0; position: absolute; left: 4px; top: 2px; font-weight: normal; }
 
-        /* 全画面時の戻るボタンここ間違えてないか最終確認 */
         #exit-fs-btn { position: fixed; bottom: 20px; right: 20px; z-index: 6000; background: #f44336; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
-        /* 右側パネル */
+        /* 右側用 */
         .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 6px; }
         .control-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         .icon-btn { height: 50px; border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 1.2rem; }
         
-        /* 還元ボード */
-        .reward-board { background: #e1f5fe; color: #01579b; border-radius: 6px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; border: 1px solid #b3e5fc; height: 75px; }
+        /* 還元右下作成用色選択確認 */
+        .reward-board { background: #e1f5fe; color: #01579b; border-radius: 6px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; border: 1px solid #b3e5fc; height: 85px; }
         .reward-col { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #b3e5fc; }
         .reward-col:last-child { border-right: none; }
-        .reward-total { font-size: 0.75rem; font-weight: 900; color: #d32f2f; margin-bottom: 2px; }
+        .reward-total-label { font-size: 0.55rem; color: #666; margin-bottom: 1px; }
         .reward-val { font-weight: 900; color: #e65100; font-size: 0.85rem; }
-        .reward-card { font-size: 0.55rem; color: #0277bd; }
+        .reward-card { font-size: 0.75rem; color: #0277bd; font-weight: 900; }
+        .reward-sub-total { font-size: 0.5rem; color: #78909c; }
 
         .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; flex-grow: 1; }
         .key { border: none; border-radius: var(--btn-radius); font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -53,7 +53,7 @@
         .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .clear-key { height: 60px; background: #607d8b; color: white; border: none; border-radius: var(--btn-radius); font-weight: bold; font-size: 1.1rem; }
 
-        /* 設定パネル */
+        /* 設定パネルここも漏れなし */
         .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; padding: 20px; }
         .modal-content { background: #222; border-radius: 12px; padding: 20px; width: 100%; max-width: 350px; margin: auto; }
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
@@ -112,7 +112,6 @@
     let activeIdx = 0, selectedRowIdx = 0;
     let isHorizontal = false, is4Col = false, isPointMode = false;
     const ROW_COUNT = 15;
-    // 還元率のデフォルトを0に設定
     let data = Array.from({length: 4}, () => Array.from({length: ROW_COUNT}, () => ({val: 0, isP: false, memo: "", rate: 0})));
 
     const colors = [
@@ -121,6 +120,10 @@
     ];
 
     function init() {
+        // 色の復元
+        const savedColor = localStorage.getItem('calc-bg-color');
+        if(savedColor) document.documentElement.style.setProperty('--list-bg', savedColor);
+
         renderColumns();
         const cGrid = document.getElementById('colorGrid');
         colors.forEach(c => {
@@ -131,14 +134,12 @@
             cGrid.appendChild(d);
         });
         const rGrid = document.getElementById('rateOptions');
-        // 0%をデフォルト追加
         [0, 1, 3, 5, 8, 10, 15, 20].forEach(r => {
             const b = document.createElement('button');
             b.className = 'rate-btn';
             b.innerText = r + '%';
             b.onclick = () => { 
                 data[activeIdx][selectedRowIdx].rate = r; 
-                // 横計算時は右側にも適用
                 if(isHorizontal) {
                     const colCount = is4Col ? 4 : 3;
                     for(let i = activeIdx + 1; i < colCount; i++) {
@@ -173,21 +174,24 @@
             const list = data[i];
             const total = list.reduce((sum, item) => item.isP ? sum : sum + item.val, 0);
             
-            // 全体還元額の計算
+            // 合計還元額
             const totalCashReward = list.reduce((sum, item) => sum + Math.floor(item.val * (item.rate / 100)), 0);
             const totalCardReward = list.reduce((sum, item) => sum + Math.floor(item.val * (Math.max(0, item.rate - 2) / 100)), 0);
 
             document.getElementById(`total-${i}`).innerText = total.toLocaleString();
 
             const cur = list[selectedRowIdx];
+            // 現金還元
             const cashP = Math.floor(cur.val * (cur.rate / 100));
+            // カード還元 (-2%計算)
             const cardR = Math.max(0, cur.rate - 2);
             const cardP = Math.floor(cur.val * (cardR / 100));
             
             board.innerHTML += `<div class="reward-col">
-                <div class="reward-total">${totalCashReward.toLocaleString()}</div>
-                <div class="reward-val">${cashP}</div>
-                <div class="reward-card">💳${cardP} (計${totalCardReward})</div>
+                <div class="reward-total-label">合計還元(現/カ)</div>
+                <div class="reward-val">${cashP.toLocaleString()}</div>
+                <div class="reward-card">💳${cardP.toLocaleString()}</div>
+                <div class="reward-sub-total">${totalCashReward.toLocaleString()} / ${totalCardReward.toLocaleString()}</div>
             </div>`;
 
             list.forEach((item, j) => {
@@ -211,7 +215,6 @@
             let s = Math.abs(target.val).toString();
             target.val = (parseInt((s === "0" ? "" : s) + n) || 0) * (target.val < 0 ? -1 : 1);
             target.isP = isPointMode;
-            // 横計算時は還元率もコピーする
             if(isHorizontal && idx > activeIdx) {
                 target.rate = data[activeIdx][selectedRowIdx].rate;
             }
@@ -225,7 +228,12 @@
     function toggle4Col() { is4Col = !is4Col; data.forEach(l => l.forEach(item => { item.val = 0; item.isP = false; item.memo = ""; item.rate = 0; })); selectedRowIdx = 0; renderColumns(); }
     function toggleYoko() { isHorizontal = !isHorizontal; document.getElementById('yoko-btn').style.background = isHorizontal ? "#ffd700" : "#64b5f6"; document.getElementById('yoko-btn').style.color = isHorizontal ? "#000" : "#fff"; }
     function togglePointMode() { isPointMode = !isPointMode; document.getElementById('p-btn').style.border = isPointMode ? "2px solid #fff" : "none"; }
-    function changeColor(c) { document.documentElement.style.setProperty('--list-bg', c); }
+    
+    function changeColor(c) { 
+        document.documentElement.style.setProperty('--list-bg', c); 
+        localStorage.setItem('calc-bg-color', c); // 色をブラウザに保存
+    }
+
     function toggleSettings(s) { document.getElementById('settings-panel').style.display = s ? 'flex' : 'none'; }
     
     function toggleFullscreen() {
