@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ノジ電</title>
+    <title>nojidentaku Pro Custom</title>
     <style>
         :root { 
             --app-bg: #1a1a1a;
@@ -12,7 +12,7 @@
             --key-num: #efefef; 
             --key-op: #555555;  
             --active-gold: #fff59d;
-            --btn-radius: 12px; /* 少し丸みのある正方形 */
+            --btn-radius: 12px;
             --app-height: 100dvh;
             --font-weight-num: 700;
         }
@@ -22,61 +22,64 @@
         
         .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 12px; gap: 12px; }
         
-        /* 全画面モード */
+        /* 全画面モード時 */
         .fs-active #keypad { display: none !important; }
         .fs-active #mainView { flex: 1; }
 
-        .lists-view-port { flex: 1.2; overflow: hidden; position: relative; border-radius: 12px; background: var(--list-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .lists-view-port { flex: 1.2; overflow: hidden; position: relative; border-radius: 12px; background: var(--list-bg); }
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
         
-        .total-display { height: 50px; color: #000; display: flex; align-items: center; justify-content: flex-end; padding: 0 12px; font-size: 1.4rem; font-weight: 900; background: var(--header-mist); border-bottom: 2px solid rgba(0,0,0,0.1); }
+        /* 合計表示バーを削除したためリストを広く使う */
         .history-area { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
         
         .history-item { 
             flex: 1; min-height: 60px; border-bottom: 1px solid rgba(0,0,0,0.05); 
             display: flex; flex-direction: column; align-items: flex-end; justify-content: center; 
-            padding-right: 10px; color: #222; font-size: 1.3rem; font-weight: var(--font-weight-num); position: relative; 
+            padding-right: 12px; color: #222; font-size: 1.4rem; font-weight: var(--font-weight-num); position: relative; 
         }
         .selected-row { background: var(--active-gold) !important; }
-        .p-mark { font-size: 0.75rem; color: #fff; background: #000; border-radius: 4px; padding: 2px 4px; margin-right: 4px; font-weight: 900; }
-        .memo-text { font-size: 0.8rem; color: #1565c0; position: absolute; left: 8px; top: 6px; font-weight: normal; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .p-mark { font-size: 0.8rem; color: #fff; background: #000; border-radius: 4px; padding: 2px 5px; margin-right: 5px; font-weight: 900; }
+        .memo-text { font-size: 0.85rem; color: #1565c0; position: absolute; left: 10px; top: 8px; font-weight: normal; }
 
-        #exit-fs-btn { position: absolute; bottom: 30px; right: 30px; z-index: 6000; background: #f44336; color: white; border: none; padding: 18px 30px; border-radius: 40px; font-weight: bold; display: none; box-shadow: 0 5px 25px rgba(0,0,0,0.5); font-size: 1.2rem; }
+        #exit-fs-btn { position: absolute; bottom: 30px; right: 30px; z-index: 6000; background: #f44336; color: white; border: none; padding: 20px 35px; border-radius: 40px; font-weight: bold; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.5); font-size: 1.2rem; }
 
-        .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 10px; max-width: 500px; }
+        .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 12px; max-width: 480px; }
         
-        .btn { border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: transform 0.05s, opacity 0.1s; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        .btn { border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
+        .btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        .top-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; height: 55px; }
-        .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-grow: 1; }
+        .top-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; height: 55px; }
+        .func-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; height: 55px; }
         
-        .num-key { background: var(--key-num); color: #333; font-size: 1.6rem; font-weight: var(--font-weight-num); aspect-ratio: 1/0.9; }
-        .op-key { background: var(--key-op); color: white; font-size: 1.3rem; }
-        .c-key { background: #cfd8dc; color: #37474f; font-size: 1.3rem; }
+        .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex-grow: 1; }
+        
+        .num-key { background: var(--key-num); color: #333; font-size: 1.7rem; font-weight: var(--font-weight-num); }
+        .op-key { background: var(--key-op); color: white; font-size: 1.4rem; }
+        .c-key { background: #cfd8dc; color: #37474f; font-size: 1.4rem; }
 
-        /* 還元表示エリア */
+        /* 還元表示エリア（ラベル削除、数字のみ） */
         .reward-area { 
-            background: #e1f5fe; color: #01579b; border-radius: 12px; padding: 12px; 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; 
-            border: 1px solid #b3e5fc; height: 110px;
+            background: #e1f5fe; border-radius: 12px; padding: 12px; 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
+            border: 1px solid #b3e5fc; height: 100px;
         }
         .reward-col { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #b3e5fc; }
         .reward-col:last-child { border-right: none; }
-        .reward-label { font-size: 0.75rem; color: #546e7a; margin-bottom: 6px; font-weight: bold; }
-        .reward-val { font-weight: 900; color: #e65100; font-size: 1.1rem; font-weight: var(--font-weight-num); }
-        .reward-card { font-size: 0.85rem; color: #0277bd; font-weight: 900; margin-top: 4px; }
+        .reward-val { font-weight: 900; color: #e65100; font-size: 1.2rem; }
+        .reward-card { font-size: 0.95rem; color: #0277bd; font-weight: 900; margin-top: 5px; }
 
-        .func-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; height: 55px; }
-        .clear-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 65px; }
+        .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 65px; }
 
         /* 設定パネル */
-        .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; padding: 20px; backdrop-filter: blur(4px); }
-        .modal-content { background: #222; border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; margin: auto; }
-        .setting-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; }
+        .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; padding: 20px; align-items: center; justify-content: center; }
+        .modal-content { background: #222; border-radius: 20px; padding: 25px; width: 100%; max-width: 420px; }
+        .setting-section { margin-bottom: 20px; }
+        .setting-title { color: #4db6ac; font-size: 1rem; margin-bottom: 12px; font-weight: bold; }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .dot { width: 100%; aspect-ratio: 1/1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .rate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .rate-btn { background: #444; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body id="appBody">
@@ -94,46 +97,53 @@
             <button class="btn" style="background:#000;" onclick="doP()" id="p-btn">P</button>
         </div>
         
+        <div class="func-row">
+            <button class="btn" style="background:#1e88e5;" id="y-btn" onclick="doY()">横計算</button>
+            <button class="btn" style="background:#7e57c2;" onclick="do4()">4連電卓</button>
+            <button class="btn" style="background:#78909c;" onclick="toggleFS()">全画面</button>
+        </div>
+
         <div class="grid-keys">
-            <button class="btn num-key" onclick="dn(7)">7</button><button class="btn num-key" onclick="dn(8)">8</button><button class="btn num-key" onclick="dn(9)">9</button><button class="btn op-key" onclick="doBS()">BS</button>
+            <button class="btn num-key" onclick="dn(7)">7</button><button class="btn num-key" onclick="dn(8)">8</button><button class="btn num-key" onclick="dn(9)">9</button><button class="btn c-key" onclick="doC()">C</button>
             <button class="btn num-key" onclick="dn(4)">4</button><button class="btn num-key" onclick="dn(5)">5</button><button class="btn num-key" onclick="dn(6)">6</button><button class="btn op-key" onclick="doMult()">×</button>
-            <button class="btn num-key" onclick="dn(1)">1</button><button class="btn num-key" onclick="dn(2)">2</button><button class="btn num-key" onclick="dn(3)">3</button><button class="btn c-key" onclick="doC()">C</button>
+            <button class="btn num-key" onclick="dn(1)">1</button><button class="btn num-key" onclick="dn(2)">2</button><button class="btn num-key" onclick="dn(3)">3</button><button class="btn op-key" onclick="doOff()">%</button>
             <button class="btn num-key" onclick="dn(0)">0</button><button class="btn num-key" onclick="dn('00')">00</button><button class="btn op-key" onclick="doOp('+')">+</button><button class="btn op-key" onclick="doOp('-')">-</button>
         </div>
 
         <div class="reward-area" id="rewardBox"></div>
 
-        <div class="func-row">
-            <button class="btn" style="background:#1e88e5; font-size:0.85rem;" id="y-btn" onclick="doY()">横計算</button>
-            <button class="btn" style="background:#7e57c2; font-size:0.85rem;" onclick="do4()">4連電卓</button>
-            <button class="btn" style="background:#78909c; font-size:0.85rem;" onclick="toggleFS()">全画面</button>
-        </div>
-
-        <div class="clear-row">
+        <div class="bottom-row">
             <button class="btn" style="background:#e53935;" onclick="doAC()">AC 全消去</button>
-            <button class="btn" style="background:#546e7a;" onclick="doCC()">列消去</button>
+            <button class="btn" style="background:#607d8b;" onclick="doCC()">列消去</button>
         </div>
     </div>
 </div>
 
 <div id="set-panel" class="settings-panel">
     <div class="modal-content">
-        <h3 style="color:#4db6ac; margin-top:0;">設定</h3>
-        <div class="setting-item">
-            <span style="color:white; font-weight:bold;">数字を太くする</span>
-            <input type="checkbox" id="boldCheck" onchange="setBold(this.checked)" style="width:22px; height:22px;">
+        <div class="setting-section">
+            <div class="setting-title">表示設定</div>
+            <label style="color:white; display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="boldCheck" onchange="setBold(this.checked)" style="width:20px; height:20px;"> 数字を太くする
+            </label>
         </div>
-        <div style="color:#ccc; font-size:0.9rem; margin-bottom:10px;">計算欄の背景色</div>
-        <div class="color-grid" id="bgPalette"></div>
-        <button class="btn" style="width:100%; height:50px; background:#fff; color:#000; margin-top:30px;" onclick="openSet(false)">閉じる</button>
+        <div class="setting-section">
+            <div class="setting-title">背景色</div>
+            <div class="color-grid" id="bgPalette"></div>
+        </div>
+        <div class="setting-section">
+            <div class="setting-title">還元率設定</div>
+            <div class="rate-grid" id="rtPalette"></div>
+        </div>
+        <button class="btn" style="width:100%; height:50px; background:#fff; color:#000;" onclick="openSet(false)">閉じる</button>
     </div>
 </div>
 
 <script>
     let ai=0, sr=0, iy=false, i4=false, ip=false;
-    // データ初期化（15行×4列分を常に保持）
     let data = Array.from({length:4},()=>Array.from({length:15},()=>({val:0,isP:false,memo:"",rate:0})));
     const clrs = ['#f7f9f9','#e3f2fd','#fce4ec','#e8f5e9','#fff3e0','#ffffff','#f5f5f5','#e0f2f1','#fffde7','#d1c4e9'];
+    const rates = [0, 1, 3, 5, 7, 10, 15, 20];
 
     function init() {
         const bg = localStorage.getItem('bg') || '#f7f9f9';
@@ -149,6 +159,13 @@
             d.onclick=()=>{document.documentElement.style.setProperty('--list-bg',c); localStorage.setItem('bg',c);};
             bgP.appendChild(d);
         });
+
+        const rtP = document.getElementById('rtPalette');
+        rates.forEach(r => {
+            const b = document.createElement('button'); b.className='rate-btn'; b.innerText=r+'%';
+            b.onclick=()=>{ data[ai][sr].rate=r; if(iy) for(let i=ai+1;i<(i4?4:3);i++) data[i][sr].rate=r; render(); };
+            rtP.appendChild(b);
+        });
     }
 
     function renderCols() {
@@ -156,7 +173,7 @@
         const n = i4 ? 4 : 3;
         for(let i=0; i<n; i++) {
             const col = document.createElement('div'); col.className = 'list-column';
-            col.innerHTML = `<div class="total-display" id="t-${i}">0</div><div class="history-area">${data[i].map((_,j)=>`<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
+            col.innerHTML = `<div class="history-area">${data[i].map((_,j)=>`<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
             cont.appendChild(col);
         }
         render();
@@ -167,17 +184,12 @@
         const n = i4 ? 4 : 3;
         for(let i=0; i<n; i++) {
             const list = data[i];
-            const tv = list.reduce((s,x)=>x.isP?s:s+x.val, 0);
             const tc = list.reduce((s,x)=>s+Math.floor(x.val*(x.rate/100)), 0);
             const tk = list.reduce((s,x)=>s+Math.floor(x.val*(Math.max(0,x.rate-2)/100)), 0);
-            document.getElementById(`t-${i}`).innerText = tv.toLocaleString();
-
             box.innerHTML += `<div class="reward-col">
-                <div class="reward-label">還元</div>
                 <div class="reward-val">${tc.toLocaleString()}</div>
                 <div class="reward-card">💳${tk.toLocaleString()}</div>
             </div>`;
-
             list.forEach((item, j) => {
                 const el = document.getElementById(`c-${i}-${j}`);
                 if(el) {
@@ -195,7 +207,6 @@
     function dn(v) {
         const u = (i) => {
             let t = data[i][sr]; let s = Math.abs(t.val).toString();
-            if(s.length > 9) return;
             t.val = (parseInt((s==="0"?"":s)+v)||0)*(t.val<0?-1:1);
             t.isP = ip; if(iy && i>ai) t.rate = data[ai][sr].rate;
         };
@@ -205,8 +216,8 @@
     function sel(l,r) { ai=l; sr=r; render(); }
     function doMemo() { const m = prompt("ラベルを入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
     function doP() { ip = !ip; document.getElementById('p-btn').style.border = ip ? "3px solid #fff" : "none"; }
-    function doY() { iy = !iy; document.getElementById('y-btn').style.filter = iy ? "brightness(1.5) contrast(1.2)" : "none"; }
-    function do4() { i4 = !i4; renderCols(); } // データを消さずに再描画のみ
+    function doY() { iy = !iy; document.getElementById('y-btn').style.filter = iy ? "brightness(1.5)" : "none"; }
+    function do4() { i4 = !i4; renderCols(); }
     function setBold(b) { if(b) document.getElementById('appBody').classList.add('bold-nums'); else document.getElementById('appBody').classList.remove('bold-nums'); localStorage.setItem('bld', b); }
     function openSet(s) { document.getElementById('set-panel').style.display = s?'flex':'none'; }
     
@@ -214,19 +225,16 @@
         const app = document.getElementById('appContainer');
         const btn = document.getElementById('exit-fs-btn');
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {
-                app.classList.add('fs-active'); btn.style.display = 'block';
-            });
+            document.documentElement.requestFullscreen().catch(() => { app.classList.add('fs-active'); btn.style.display = 'block'; });
             app.classList.add('fs-active'); btn.style.display = 'block';
         } else {
-            document.exitFullscreen();
-            app.classList.remove('fs-active'); btn.style.display = 'none';
+            document.exitFullscreen(); app.classList.remove('fs-active'); btn.style.display = 'none';
         }
     }
 
-    function doBS() { const f=(i)=>{let s=Math.abs(data[i][sr].val).toString(); data[i][sr].val=(parseInt(s.slice(0,-1))||0)*(data[i][sr].val<0?-1:1);}; if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
     function doC() { data[ai][sr].val=0; data[ai][sr].rate=0; data[ai][sr].memo=""; data[ai][sr].isP=false; render(); }
-    function doMult() { const v=prompt("掛ける数","1.1"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
+    function doMult() { const v=prompt("数値を入力"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
+    function doOff() { const v=prompt("何%オフ？"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val * (1 - f/100)); render(); } } }
     function doOp(o) { const f=(i)=>data[i][sr].val=Math.abs(data[i][sr].val)*(o==='-'?-1:1); if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
     function doAC() { if(confirm("全削除してよろしいですか？")) { data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render(); } }
     function doCC() { data[ai].forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;}); render(); }
