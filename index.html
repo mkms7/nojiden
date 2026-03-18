@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>nojidentaku Pro Custom</title>
+    <title>ノジ電卓</title>
     <style>
         :root { 
             --app-bg: #1a1a1a;
@@ -29,18 +29,18 @@
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
         
-        /* 【修正】列の合計表示：大きく、白く */
+        
         .col-total { 
-            height: 55px; /* 大きく */
-            background: #fafafa; /* ちょい白 */
-            border-bottom: 2px solid rgba(0,0,0,0.1); /* 線も少し太く */
+            height: 55px; 
+            background: #fafafa; 
+            border-bottom: 2px solid rgba(0,0,0,0.1); 
             display: flex; 
             align-items: center; 
             justify-content: flex-end; 
             padding: 0 15px; 
             color: #000; 
             font-weight: 900; 
-            font-size: 1.3rem; /* 文字も大きく */
+            font-size: 1.3rem; 
         }
 
         .history-area { 
@@ -242,7 +242,7 @@
     }
 
     function sel(l,r) { ai=l; sr=r; render(); }
-    function doMemo() { const m = prompt("ラベルを入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
+    function doMemo() { const m = prompt("入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
     function doP() { ip = !ip; document.getElementById('p-btn').style.border = ip ? "3px solid #fff" : "none"; }
     function doY() { iy = !iy; document.getElementById('y-btn').style.filter = iy ? "brightness(1.5)" : "none"; }
     function do4() { i4 = !i4; renderCols(); }
