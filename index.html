@@ -22,7 +22,6 @@
         
         .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 12px; gap: 12px; }
         
-        /* 全画面モード時 */
         .fs-active #keypad { display: none !important; }
         .fs-active #mainView { flex: 1; }
 
@@ -30,18 +29,18 @@
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
         
-        /* リストエリア（スクロールバー非表示） */
+        /* 列の合計表示 */
+        .col-total { height: 40px; background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-end; padding: 0 12px; color: #000; font-weight: 900; font-size: 1.1rem; }
+
         .history-area { 
             flex-grow: 1; 
             display: flex; 
             flex-direction: column; 
             overflow-y: auto; 
-            -ms-overflow-style: none;    /* IE, Edge用 */
-            scrollbar-width: none;       /* Firefox用 */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        .history-area::-webkit-scrollbar { 
-            display: none;               /* Chrome, Safari用 */
-        }
+        .history-area::-webkit-scrollbar { display: none; }
         
         .history-item { 
             flex: 1; min-height: 60px; border-bottom: 1px solid rgba(0,0,0,0.05); 
@@ -56,22 +55,21 @@
 
         .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 12px; max-width: 480px; }
         
-        .btn { border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
+        .btn { border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
         .btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        /* ボタン連結用スタイル */
         .joined-row { display: flex; height: 55px; }
         .joined-row .btn { flex: 1; border-radius: 0; }
         .joined-row .btn:first-child { border-top-left-radius: var(--btn-radius); border-bottom-left-radius: var(--btn-radius); }
         .joined-row .btn:last-child { border-top-right-radius: var(--btn-radius); border-bottom-right-radius: var(--btn-radius); }
         
         .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex-grow: 1; }
+        .grid-keys .btn { border-radius: var(--btn-radius); }
         
         .num-key { background: var(--key-num); color: #333; font-size: 1.7rem; font-weight: var(--font-weight-num); }
         .op-key { background: var(--key-op); color: white; font-size: 1.4rem; }
         .c-key { background: #cfd8dc; color: #37474f; font-size: 1.4rem; }
 
-        /* 還元エリア（数字のみ） */
         .reward-area { 
             background: #e1f5fe; border-radius: 12px; padding: 12px; 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
@@ -83,11 +81,12 @@
         .reward-card { font-size: 0.95rem; color: #0277bd; font-weight: 900; margin-top: 5px; }
 
         .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 65px; }
+        .bottom-row .btn { border-radius: var(--btn-radius); }
 
-        /* 設定パネル */
         .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; padding: 20px; align-items: center; justify-content: center; }
         .modal-content { background: #222; border-radius: 20px; padding: 25px; width: 100%; max-width: 420px; }
-        .setting-section { margin-bottom: 20px; }
+        .setting-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; }
+        .setting-section:last-of-type { border-bottom: none; }
         .setting-title { color: #4db6ac; font-size: 1rem; margin-bottom: 12px; font-weight: bold; }
         .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .dot { width: 100%; aspect-ratio: 1/1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
@@ -126,7 +125,7 @@
         <div class="reward-area" id="rewardBox"></div>
 
         <div class="bottom-row">
-            <button class="btn" style="background:#e53935;" onclick="doAC()">AC 全消去</button>
+            <button class="btn" style="background:#607d8b;" onclick="doAC()">AC 全消去</button>
             <button class="btn" style="background:#607d8b;" onclick="doCC()">列消去</button>
         </div>
     </div>
@@ -148,7 +147,7 @@
             <div class="setting-title">還元率設定</div>
             <div class="rate-grid" id="rtPalette"></div>
         </div>
-        <button class="btn" style="width:100%; height:50px; background:#fff; color:#000;" onclick="openSet(false)">閉じる</button>
+        <button class="btn" style="width:100%; height:50px; background:#fff; color:#000; border-radius:12px;" onclick="openSet(false)">閉じる</button>
     </div>
 </div>
 
@@ -186,7 +185,7 @@
         const n = i4 ? 4 : 3;
         for(let i=0; i<n; i++) {
             const col = document.createElement('div'); col.className = 'list-column';
-            col.innerHTML = `<div class="history-area">${data[i].map((_,j)=>`<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
+            col.innerHTML = `<div class="col-total" id="col-t-${i}">0</div><div class="history-area">${data[i].map((_,j)=>`<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
             cont.appendChild(col);
         }
         render();
@@ -197,8 +196,13 @@
         const n = i4 ? 4 : 3;
         for(let i=0; i<n; i++) {
             const list = data[i];
+            const sum = list.reduce((s,x)=>x.isP?s:s+x.val, 0);
             const tc = list.reduce((s,x)=>s+Math.floor(x.val*(x.rate/100)), 0);
             const tk = list.reduce((s,x)=>s+Math.floor(x.val*(Math.max(0,x.rate-2)/100)), 0);
+            
+            const head = document.getElementById(`col-t-${i}`);
+            if(head) head.innerText = sum.toLocaleString();
+
             box.innerHTML += `<div class="reward-col">
                 <div class="reward-val">${tc.toLocaleString()}</div>
                 <div class="reward-card">💳${tk.toLocaleString()}</div>
