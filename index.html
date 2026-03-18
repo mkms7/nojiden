@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>ノジ電卓</title>
     <style>
         :root { 
@@ -22,6 +24,7 @@
         
         .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 12px; gap: 12px; }
         
+        
         .fs-active #keypad { display: none !important; }
         .fs-active #mainView { flex: 1; }
 
@@ -40,7 +43,7 @@
             padding: 0 15px; 
             color: #000; 
             font-weight: 900; 
-            font-size: 1.3rem; 
+            font-size: 1.7rem; 
         }
 
         .history-area { 
@@ -62,13 +65,20 @@
         .p-mark { font-size: 0.8rem; color: #fff; background: #000; border-radius: 4px; padding: 2px 5px; margin-right: 5px; font-weight: 900; }
         .memo-text { font-size: 0.85rem; color: #1565c0; position: absolute; left: 10px; top: 8px; font-weight: normal; }
 
-        #exit-fs-btn { position: absolute; bottom: 30px; right: 30px; z-index: 6000; background: #f44336; color: white; border: none; padding: 20px 35px; border-radius: 40px; font-weight: bold; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.5); font-size: 1.2rem; }
+        
+        #exit-fs-btn { 
+            position: absolute; bottom: 30px; right: 30px; z-index: 6000; 
+            background: #f44336; color: white; border: none; padding: 20px 35px; 
+            border-radius: 40px; font-weight: bold; display: none; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5); font-size: 1.2rem; 
+        }
 
         .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 12px; max-width: 480px; }
         
         .btn { border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
         .btn:active { transform: scale(0.96); opacity: 0.8; }
 
+        
         .joined-row { display: flex; height: 55px; }
         .joined-row .btn { flex: 1; border-radius: 0; }
         .joined-row .btn:first-child { border-top-left-radius: var(--btn-radius); border-bottom-left-radius: var(--btn-radius); }
@@ -110,7 +120,7 @@
 <div class="app-container" id="appContainer">
     <div class="lists-view-port" id="mainView">
         <div class="lists-scroll-container" id="scrollContainer"></div>
-        <button id="exit-fs-btn" onclick="toggleFS()">全画面解除</button>
+        <button id="exit-fs-btn" onclick="toggleViewMode()">戻る</button>
     </div>
 
     <div class="keypad-container" id="keypad">
@@ -123,7 +133,7 @@
         <div class="joined-row">
             <button class="btn" style="background:#1e88e5;" id="y-btn" onclick="doY()">横計算</button>
             <button class="btn" style="background:#7e57c2;" onclick="do4()">4連電卓</button>
-            <button class="btn" style="background:#78909c;" onclick="toggleFS()">全画面</button>
+            <button class="btn" style="background:#78909c;" onclick="toggleViewMode()">全画面</button>
         </div>
 
         <div class="grid-keys">
@@ -242,26 +252,28 @@
     }
 
     function sel(l,r) { ai=l; sr=r; render(); }
-    function doMemo() { const m = prompt("入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
+    function doMemo() { const m = prompt("ラベルを入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
     function doP() { ip = !ip; document.getElementById('p-btn').style.border = ip ? "3px solid #fff" : "none"; }
     function doY() { iy = !iy; document.getElementById('y-btn').style.filter = iy ? "brightness(1.5)" : "none"; }
     function do4() { i4 = !i4; renderCols(); }
     function setBold(b) { if(b) document.getElementById('appBody').classList.add('bold-nums'); else document.getElementById('appBody').classList.remove('bold-nums'); localStorage.setItem('bld', b); }
     function openSet(s) { document.getElementById('set-panel').style.display = s?'flex':'none'; }
     
-    function toggleFS() {
+    
+    function toggleViewMode() {
         const app = document.getElementById('appContainer');
         const btn = document.getElementById('exit-fs-btn');
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => { app.classList.add('fs-active'); btn.style.display = 'block'; });
-            app.classList.add('fs-active'); btn.style.display = 'block';
+        if (!app.classList.contains('fs-active')) {
+            app.classList.add('fs-active');
+            btn.style.display = 'block';
         } else {
-            document.exitFullscreen(); app.classList.remove('fs-active'); btn.style.display = 'none';
+            app.classList.remove('fs-active');
+            btn.style.display = 'none';
         }
     }
 
     function doC() { data[ai][sr].val=0; data[ai][sr].rate=0; data[ai][sr].memo=""; data[ai][sr].isP=false; render(); }
-    function doMult() { const v=prompt("数値を入力"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
+    function doMult() { const v=prompt("数値"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
     function doOff() { const v=prompt("何%オフにしますか？"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val * (1 - f/100)); render(); } } }
     function doOp(o) { const f=(i)=>data[i][sr].val=Math.abs(data[i][sr].val)*(o==='-'?-1:1); if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
     function doAC() { if(confirm("全削除してよろしいですか？")) { data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render(); } }
