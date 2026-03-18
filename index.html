@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>nojidentaku</title>
+    <title>ノジ電卓</title>
     <style>
         :root { 
             --app-bg: #1a1a1a;
@@ -15,67 +15,73 @@
             --btn-radius: 8px;
             --app-height: 100dvh;
             --font-weight-num: 700;
+            --btn-custom-color: #555555; 
         }
         .bold-nums { --font-weight-num: 900; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
         body { margin: 0; background: var(--app-bg); font-family: sans-serif; height: var(--app-height); overflow: hidden; color: white; display: flex; justify-content: center; }
-        .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 10px; gap: 10px; transition: 0.3s; }
-        .fullscreen-mode .keypad-container { display: none !important; }
-        .fullscreen-mode .lists-view-port { flex: 1; }
+        
+        .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 10px; gap: 10px; }
+        
+        
+        .fullscreen-active #keypad { display: none !important; }
+        .fullscreen-active #mainView { flex: 1; }
+
         .lists-view-port { flex: 1.2; overflow: hidden; position: relative; border-radius: 10px; background: var(--list-bg); }
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
+        
         .total-display { height: 50px; color: #000; display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; font-size: 1.3rem; font-weight: 900; background: var(--header-mist); border-bottom: 2px solid rgba(0,0,0,0.1); }
         .history-area { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        
         .history-item { 
-            flex: 1; 
-            min-height: 55px; /* マスを大きく設定 */
-            border-bottom: 1px solid rgba(0,0,0,0.05); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-end; 
-            justify-content: center; 
-            padding-right: 8px; 
-            color: #222; 
-            font-size: 1.2rem; 
-            font-weight: var(--font-weight-num); 
-            position: relative; 
+            flex: 1; min-height: 55px; border-bottom: 1px solid rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; align-items: flex-end; justify-content: center; 
+            padding-right: 8px; color: #222; font-size: 1.2rem; font-weight: var(--font-weight-num); position: relative; 
         }
         .selected-row { background: var(--active-gold) !important; }
         .p-mark { font-size: 0.7rem; color: #fff; background: #000; border-radius: 3px; padding: 1px 3px; margin-right: 3px; }
         .memo-text { font-size: 0.75rem; color: #1565c0; position: absolute; left: 6px; top: 4px; font-weight: normal; }
-        #exit-fs-btn { position: absolute; bottom: 20px; right: 20px; z-index: 6000; background: #f44336; color: white; border: none; padding: 15px 25px; border-radius: 30px; font-weight: bold; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 8px; max-width: 480px; }
-        .control-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .icon-btn { height: 50px; border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 1.2rem; }
-        .reward-board { background: #e1f5fe; color: #01579b; border-radius: 8px; padding: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border: 1px solid #b3e5fc; height: 110px; }
-        .reward-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; border-right: 1px solid #b3e5fc; padding: 2px 0; }
+
+        #exit-fs-btn { position: absolute; bottom: 30px; right: 30px; z-index: 6000; background: #f44336; color: white; border: none; padding: 20px 30px; border-radius: 40px; font-weight: bold; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.4); font-size: 1.2rem; }
+
+        .keypad-container { flex: 1; display: flex; flex-direction: column; gap: 8px; max-width: 500px; }
+        
+       
+        .btn-base { border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: filter 0.1s; background: var(--btn-custom-color); }
+        .btn-base:active { filter: brightness(1.3); }
+
+        .top-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; height: 55px; }
+        .op-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; height: 55px; }
+        .grid-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex-grow: 1; }
+        
+        .key-num { background: var(--key-num); color: #333; font-size: 1.5rem; font-weight: var(--font-weight-num); }
+        .key-op-small { font-size: 1.2rem; }
+
+      
+        .total-reward-box { 
+            background: #e1f5fe; color: #01579b; border-radius: 8px; padding: 10px; 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
+            border: 1px solid #b3e5fc; flex-grow: 0.6; min-height: 120px;
+        }
+        .reward-col { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #b3e5fc; }
         .reward-col:last-child { border-right: none; }
-        .reward-section { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .reward-label { font-size: 0.55rem; color: #546e7a; transform: scale(0.9); }
-        .reward-val { font-weight: 900; color: #e65100; font-size: 0.9rem; font-weight: var(--font-weight-num); }
-        .reward-card { font-size: 0.75rem; color: #0277bd; font-weight: 900; }
-        .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex-grow: 1; }
-        .key { border: none; border-radius: var(--btn-radius); font-size: 1.4rem; font-weight: var(--font-weight-num); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        /* 1-9を少し小さく調整 */
-        .num-key { background: var(--key-num); color: #333; height: 55px; } 
-        .op-key { background: var(--key-op); color: white; }
-        .clear-mini { background: #cfd8dc; color: #37474f; } /* Cボタン用 */
-        .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .clear-key { height: 60px; background: #607d8b; color: white; border: none; border-radius: var(--btn-radius); font-weight: bold; font-size: 1.1rem; }
-        .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; padding: 20px; }
-        .modal-content { background: #222; border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; margin: auto; }
-        .setting-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .switch { position: relative; width: 44px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #555; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4db6ac; }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
-        .color-dot { width: 100%; aspect-ratio: 1/1; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
-        .rate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .rate-btn { background: #444; color: white; border: none; padding: 12px 0; border-radius: 6px; font-weight: bold; }
+        .reward-label { font-size: 0.7rem; color: #546e7a; margin-bottom: 5px; font-weight: bold; }
+        .reward-val { font-weight: 900; color: #e65100; font-size: 1.1rem; font-weight: var(--font-weight-num); }
+        .reward-card { font-size: 0.9rem; color: #0277bd; font-weight: 900; margin-top: 4px; }
+
+        .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 65px; }
+        
+        /* 設定パネル */
+        .settings-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
+        .modal-content { background: #222; border-radius: 20px; padding: 25px; width: 100%; max-width: 450px; margin: auto; }
+        .setting-section { margin-bottom: 25px; border-bottom: 1px solid #444; padding-bottom: 15px; }
+        .setting-title { color: #4db6ac; font-size: 1rem; margin-bottom: 15px; font-weight: bold; }
+        .setting-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        
+        .color-palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .dot { width: 100%; aspect-ratio: 1/1; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .dot.selected { border-color: white; transform: scale(1.1); }
     </style>
 </head>
 <body id="appBody">
@@ -83,151 +89,196 @@
 <div class="app-container" id="appContainer">
     <div class="lists-view-port" id="mainView">
         <div class="lists-scroll-container" id="scrollContainer"></div>
-        <button id="exit-fs-btn" onclick="toggleFS()">リストを閉じる</button>
+        <button id="exit-fs-btn" onclick="toggleFS()">全画面解除</button>
     </div>
 
     <div class="keypad-container" id="keypad">
-        <div class="control-grid">
-            <button class="icon-btn" style="background:#546e7a" onclick="setOpen(true)">⚙</button>
-            <button class="icon-btn" style="background:#4db6ac" onclick="memo()">🔍</button>
-            <button class="icon-btn" style="background:#000;" onclick="point()" id="p-btn">P</button>
+        <div class="top-row">
+            <button class="btn-base custom-target" onclick="openSet(true)">⚙</button>
+            <button class="btn-base custom-target" onclick="doMemo()">🔍</button>
+            <button class="btn-base custom-target" onclick="doP()" id="p-btn">P</button>
         </div>
-        <div class="control-grid">
-            <button class="icon-btn" style="background:#64b5f6; font-size:0.85rem;" onclick="yoko()" id="yoko-btn">横計算</button>
-            <button class="icon-btn" style="background:#9575cd; font-size:0.85rem;" onclick="four()">4連電卓</button>
-            <button class="icon-btn" style="background:#90a4ae; font-size:0.85rem;" onclick="toggleFS()">全画面風</button>
+        
+        <div class="op-row">
+            <button class="btn-base key-op-small" style="background:#555" onclick="doBS()">BS</button>
+            <button class="btn-base key-op-small" style="background:#cfd8dc; color:#333;" onclick="doC()">C</button>
+            <button class="btn-base key-op-small" style="background:#555" onclick="doMult()">×</button>
+            <button class="btn-base key-op-small" style="background:#555" onclick="doOp('+')">+</button>
+            <button class="btn-base key-op-small" style="background:#555" onclick="doOp('-')">-</button>
         </div>
 
         <div class="grid-keys">
-            <button class="key num-key" onclick="n(7)">7</button><button class="key num-key" onclick="n(8)">8</button><button class="key num-key" onclick="n(9)">9</button><button class="key op-key" onclick="bs()">BS</button>
-            <button class="key num-key" onclick="n(4)">4</button><button class="key num-key" onclick="n(5)">5</button><button class="key num-key" onclick="n(6)">6</button><button class="key op-key" onclick="mult()">×</button>
-            <button class="key num-key" onclick="n(1)">1</button><button class="key num-key" onclick="n(2)">2</button><button class="key num-key" onclick="n(3)">3</button><button class="key op-key clear-mini" onclick="clsRow()">C</button>
-            <button class="key num-key" onclick="n(0)">0</button><button class="key num-key" onclick="n('00')">00</button><button class="key op-key" onclick="op('+')">+</button><button class="key op-key" onclick="op('-')">-</button>
+            <button class="btn-base key-num" onclick="dn(7)">7</button><button class="btn-base key-num" onclick="dn(8)">8</button><button class="btn-base key-num" onclick="dn(9)">9</button>
+            <button class="btn-base key-num" onclick="dn(4)">4</button><button class="btn-base key-num" onclick="dn(5)">5</button><button class="btn-base key-num" onclick="dn(6)">6</button>
+            <button class="btn-base key-num" onclick="dn(1)">1</button><button class="btn-base key-num" onclick="dn(2)">2</button><button class="btn-base key-num" onclick="dn(3)">3</button>
+            <button class="btn-base key-num" onclick="dn(0)">0</button><button class="btn-base key-num" onclick="dn('00')">00</button>
+            <button class="btn-base custom-target" style="font-size:0.8rem;" id="y-btn" onclick="doY()">横計算</button>
         </div>
 
-        <div class="reward-board" id="rewardBoard"></div>
+        <div class="total-reward-box" id="rewardBox"></div>
 
         <div class="bottom-row">
-            <button class="clear-key" onclick="ac()">AC 全消去</button>
-            <button class="clear-key" onclick="cc()">列消去</button>
+            <button class="btn-base custom-target" style="font-size:0.8rem;" onclick="do4()">4連電卓</button>
+            <button class="btn-base custom-target" style="font-size:0.8rem;" onclick="toggleFS()">全画面</button>
+        </div>
+        <div class="bottom-row">
+            <button class="btn-base" style="background:#f44336;" onclick="doAC()">AC 全消去</button>
+            <button class="btn-base" style="background:#607d8b;" onclick="doCC()">列消去</button>
         </div>
     </div>
 </div>
 
-<div id="settings-panel" class="settings-panel">
+<div id="set-panel" class="settings-panel">
     <div class="modal-content">
-        <div class="setting-item">
-            <span style="color:white; font-weight:bold;">数字を太くする</span>
-            <label class="switch"><input type="checkbox" id="boldSw" onchange="toggleB(this.checked)"><span class="slider"></span></label>
+        <div class="setting-section">
+            <div class="setting-title">表示設定</div>
+            <div class="setting-item">
+                <span style="color:white;">数字を太くする</span>
+                <input type="checkbox" id="boldCheck" onchange="setBold(this.checked)" style="width:20px; height:20px;">
+            </div>
         </div>
-        <h3 style="color:#ccc; font-size:0.9rem; margin-bottom:10px;">計算欄の背景色</h3>
-        <div class="color-grid" id="cGrid"></div>
-        <h3 style="color:#ccc; font-size:0.9rem; margin-bottom:10px;">還元率(%)</h3>
-        <div class="rate-grid" id="rGrid"></div>
-        <button class="icon-btn" style="width:100%; margin-top:20px; background:#fff; color:#000;" onclick="setOpen(false)">閉じる</button>
+
+        <div class="setting-section">
+            <div class="setting-title">計算欄の背景色</div>
+            <div class="color-palette" id="bgPalette"></div>
+        </div>
+
+        <div class="setting-section">
+            <div class="setting-title">ボタンのカスタム色</div>
+            <div class="color-palette" id="btnPalette"></div>
+        </div>
+
+        <div class="setting-section">
+            <div class="setting-title">還元率設定</div>
+            <div class="color-palette" style="grid-template-columns: repeat(4, 1fr);" id="ratePalette"></div>
+        </div>
+
+        <button class="btn-base" style="width:100%; height:50px; background:#fff; color:#000;" onclick="openSet(false)">閉じる</button>
     </div>
 </div>
 
 <script>
-    let aIdx = 0, sRow = 0, isY = false, is4 = false, isP = false;
-    let data = Array.from({length: 4}, () => Array.from({length: 15}, () => ({val: 0, isP: false, memo: "", rate: 0})));
-    const colors = ['#f7f9f9', '#e3f2fd', '#fce4ec', '#e8f5e9', '#fff3e0', '#ffffff', '#f5f5f5', '#e0f2f1', '#fffde7', '#d1c4e9'];
+    let ai=0, sr=0, iy=false, i4=false, ip=false;
+    let data = Array.from({length:4},()=>Array.from({length:15},()=>({val:0,isP:false,memo:"",rate:0})));
+    const clrs = ['#f7f9f9','#e3f2fd','#fce4ec','#e8f5e9','#fff3e0','#ffffff','#f5f5f5','#e0f2f1','#fffde7','#d1c4e9'];
+    const btnClrs = ['#555555','#455a64','#263238','#1a237e','#311b92','#004d40','#33691e','#bf360c','#3e2723','#000000'];
 
     function init() {
-        const c = localStorage.getItem('bg') || '#f7f9f9';
-        document.documentElement.style.setProperty('--list-bg', c);
-        const b = localStorage.getItem('bold') === 'true';
-        document.getElementById('boldSw').checked = b;
-        toggleB(b);
+        const bg = localStorage.getItem('bg') || '#f7f9f9';
+        const bc = localStorage.getItem('bc') || '#555555';
+        const bld = localStorage.getItem('bld') === 'true';
+        document.documentElement.style.setProperty('--list-bg', bg);
+        document.documentElement.style.setProperty('--btn-custom-color', bc);
+        document.getElementById('boldCheck').checked = bld;
+        setBold(bld);
+
         renderCols();
-        colors.forEach(clr => {
-            const d = document.createElement('div'); d.className = 'color-dot'; d.style.background = clr;
-            d.onclick = () => { document.documentElement.style.setProperty('--list-bg', clr); localStorage.setItem('bg', clr); };
-            document.getElementById('cGrid').appendChild(d);
+        
+        const bgP = document.getElementById('bgPalette');
+        clrs.forEach(c => {
+            const d = document.createElement('div'); d.className='dot'; d.style.background=c;
+            d.onclick=()=>{document.documentElement.style.setProperty('--list-bg',c); localStorage.setItem('bg',c);};
+            bgP.appendChild(d);
         });
-        [0, 1, 3, 5, 8, 10, 15, 20].forEach(r => {
-            const btn = document.createElement('button'); btn.className = 'rate-btn'; btn.innerText = r+'%';
-            btn.onclick = () => { data[aIdx][sRow].rate = r; if(isY) for(let i=aIdx+1; i<(is4?4:3); i++) data[i][sRow].rate = r; render(); };
-            document.getElementById('rGrid').appendChild(btn);
+
+        const btnP = document.getElementById('btnPalette');
+        btnClrs.forEach(c => {
+            const d = document.createElement('div'); d.className='dot'; d.style.background=c;
+            d.onclick=()=>{document.documentElement.style.setProperty('--btn-custom-color',c); localStorage.setItem('bc',c);};
+            btnP.appendChild(d);
+        });
+
+        const rtP = document.getElementById('ratePalette');
+        [0,1,3,5,8,10,15,20].forEach(r => {
+            const b = document.createElement('button'); b.className='btn-base'; b.style.height='40px'; b.innerText=r+'%';
+            b.onclick=()=>{ data[ai][sr].rate=r; if(iy) for(let i=ai+1; i<(i4?4:3); i++) data[i][sr].rate=r; render(); };
+            rtP.appendChild(b);
         });
     }
 
     function renderCols() {
         const cont = document.getElementById('scrollContainer'); cont.innerHTML = '';
-        const num = is4 ? 4 : 3;
-        for(let i=0; i<num; i++) {
+        const n = i4 ? 4 : 3;
+        for(let i=0; i<n; i++) {
             const col = document.createElement('div'); col.className = 'list-column';
-            col.innerHTML = `<div class="total-display" id="t-${i}">0</div><div class="history-area">${data[i].map((_, j) => `<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
+            col.innerHTML = `<div class="total-display" id="t-${i}">0</div><div class="history-area">${data[i].map((_,j)=>`<div class="history-item" id="c-${i}-${j}" onclick="sel(${i},${j})"></div>`).join('')}</div>`;
             cont.appendChild(col);
         }
         render();
     }
 
     function render() {
-        const board = document.getElementById('rewardBoard'); board.innerHTML = '';
-        const numCols = is4 ? 4 : 3;
-        for(let i=0; i<numCols; i++) {
+        const box = document.getElementById('rewardBox'); box.innerHTML = '';
+        const n = i4 ? 4 : 3;
+        for(let i=0; i<n; i++) {
             const list = data[i];
-            const totalVal = list.reduce((s, x) => x.isP ? s : s + x.val, 0);
-            const totalCash = list.reduce((s, x) => s + Math.floor(x.val * (x.rate / 100)), 0);
-            const totalCard = list.reduce((s, x) => s + Math.floor(x.val * (Math.max(0, x.rate - 2) / 100)), 0);
-            document.getElementById(`t-${i}`).innerText = totalVal.toLocaleString();
+            const tv = list.reduce((s,x)=>x.isP?s:s+x.val, 0);
+            const tc = list.reduce((s,x)=>s+Math.floor(x.val*(x.rate/100)), 0);
+            const tk = list.reduce((s,x)=>s+Math.floor(x.val*(Math.max(0,x.rate-2)/100)), 0);
+            document.getElementById(`t-${i}`).innerText = tv.toLocaleString();
 
-            const cur = list[sRow];
-            const curCash = Math.floor(cur.val * (cur.rate / 100));
-            const curCard = Math.floor(cur.val * (Math.max(0, cur.rate - 2) / 100));
-
-            board.innerHTML += `<div class="reward-col">
-                <div class="reward-section">
-                    <div class="reward-label">列合計還元</div>
-                    <div class="reward-val" style="color:#004d40">${totalCash.toLocaleString()}</div>
-                    <div class="reward-card">💳${totalCard.toLocaleString()}</div>
-                </div>
-                <div style="width:80%; height:1px; background:rgba(0,0,0,0.1);"></div>
-                <div class="reward-section">
-                    <div class="reward-label">選択マス還元</div>
-                    <div class="reward-val">${curCash.toLocaleString()}</div>
-                    <div class="reward-card">💳${curCard.toLocaleString()}</div>
-                </div>
+            box.innerHTML += `<div class="reward-col">
+                <div class="reward-label">トータル</div>
+                <div class="reward-val">${tc.toLocaleString()}</div>
+                <div class="reward-card">💳${tk.toLocaleString()}</div>
             </div>`;
 
             list.forEach((item, j) => {
                 const el = document.getElementById(`c-${i}-${j}`);
                 if(el) {
                     let h = `<div class="memo-text">${item.memo}</div>`;
-                    let v = item.val === 0 ? "" : item.val.toLocaleString();
-                    if(item.isP && item.val !== 0) v = `<span class="p-mark">P</span>` + v;
+                    let v = item.val===0 ? "" : item.val.toLocaleString();
+                    if(item.isP && item.val!==0) v = `<span class="p-mark">P</span>` + v;
                     h += `<div>${v}</div>`;
-                    if(item.val !== 0) h += `<div style="font-size:0.6rem; color:#888;">${item.rate}%</div>`;
-                    el.innerHTML = h; el.classList.toggle('selected-row', (i===aIdx && j===sRow));
+                    if(item.val!==0) h += `<div style="font-size:0.6rem; color:#888;">${item.rate}%</div>`;
+                    el.innerHTML = h; el.classList.toggle('selected-row', (i===ai && j===sr));
                 }
             });
         }
     }
 
-    function n(val) {
-        const up = (i) => {
-            let t = data[i][sRow]; let s = Math.abs(t.val).toString();
-            t.val = (parseInt((s === "0" ? "" : s) + val) || 0) * (t.val < 0 ? -1 : 1);
-            t.isP = isP; if(isY && i > aIdx) t.rate = data[aIdx][sRow].rate;
+    function dn(v) {
+        const u = (i) => {
+            let t = data[i][sr]; let s = Math.abs(t.val).toString();
+            t.val = (parseInt((s==="0"?"":s)+v)||0)*(t.val<0?-1:1);
+            t.isP = ip; if(iy && i>ai) t.rate = data[ai][sr].rate;
         };
-        if(isY) { for(let i=aIdx; i<(is4?4:3); i++) up(i); } else { up(aIdx); } render();
+        if(iy) { for(let i=ai; i<(i4?4:3); i++) u(i); } else { u(ai); } render();
     }
 
-    function sel(l, r) { aIdx = l; sRow = r; render(); }
-    function memo() { const m = prompt("ラベル", data[aIdx][sRow].memo); if(m !== null) { data[aIdx][sRow].memo = m; render(); } }
-    function four() { is4 = !is4; aIdx=0; sRow=0; renderCols(); }
-    function yoko() { isY = !isY; document.getElementById('yoko-btn').style.background = isY ? "#ffd700" : "#64b5f6"; document.getElementById('yoko-btn').style.color = isY ? "#000" : "#fff"; }
-    function point() { isP = !isP; document.getElementById('p-btn').style.border = isP ? "2px solid #fff" : "none"; }
-    function toggleB(b) { if(b) document.getElementById('appBody').classList.add('bold-nums'); else document.getElementById('appBody').classList.remove('bold-nums'); localStorage.setItem('bold', b); }
-    function setOpen(s) { document.getElementById('settings-panel').style.display = s ? 'flex' : 'none'; }
-    function toggleFS() { const c = document.getElementById('appContainer'); const b = document.getElementById('exit-fs-btn'); if(c.classList.contains('fullscreen-mode')) { c.classList.remove('fullscreen-mode'); b.style.display='none'; } else { c.classList.add('fullscreen-mode'); b.style.display='block'; } }
-    function bs() { const f = (i) => { let s = Math.abs(data[i][sRow].val).toString(); data[i][sRow].val = (parseInt(s.slice(0, -1)) || 0) * (data[i][sRow].val < 0 ? -1 : 1); }; if(isY) for(let i=aIdx; i<(is4?4:3); i++) f(i); else f(aIdx); render(); }
-    function mult() { const v = prompt("掛ける数"); if(v) { data[aIdx][sRow].val *= parseFloat(v); render(); } }
-    function op(o) { const f = (i) => data[i][sRow].val = Math.abs(data[i][sRow].val) * (o === '-' ? -1 : 1); if(isY) for(let i=aIdx; i<(is4?4:3); i++) f(i); else f(aIdx); render(); }
-    function clsRow() { data[aIdx][sRow].val = 0; data[aIdx][sRow].rate = 0; data[aIdx][sRow].memo = ""; data[aIdx][sRow].isP = false; render(); }
-    function ac() { if(confirm("全消去？")) { data.forEach(l => l.forEach(x => {x.val=0; x.isP=false; x.memo=""; x.rate=0;})); render(); } }
-    function cc() { data[aIdx].forEach(x => {x.val=0; x.isP=false; x.memo=""; x.rate=0;}); render(); }
+    function sel(l,r) { ai=l; sr=r; render(); }
+    function doMemo() { const m = prompt("ラベルを入力", ""); if(m !== null) { data[ai][sr].memo = m; render(); } }
+    function doP() { ip = !ip; document.getElementById('p-btn').style.border = ip ? "3px solid #fff" : "none"; }
+    function doY() { iy = !iy; document.getElementById('y-btn').style.filter = iy ? "hue-rotate(90deg) brightness(1.5)" : "none"; }
+    function do4() { i4 = !i4; ai=0; sr=0; renderCols(); }
+    function setBold(b) { if(b) document.getElementById('appBody').classList.add('bold-nums'); else document.getElementById('appBody').classList.remove('bold-nums'); localStorage.setItem('bld', b); }
+    function openSet(s) { document.getElementById('set-panel').style.display = s?'flex':'none'; }
+    
+    function toggleFS() {
+        const app = document.getElementById('appContainer');
+        const btn = document.getElementById('exit-fs-btn');
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {
+                // Safari用擬似全画面
+                app.classList.add('fullscreen-active');
+                btn.style.display = 'block';
+            });
+            app.classList.add('fullscreen-active');
+            btn.style.display = 'block';
+        } else {
+            document.exitFullscreen();
+            app.classList.remove('fullscreen-active');
+            btn.style.display = 'none';
+        }
+    }
+
+    function doBS() { const f=(i)=>{let s=Math.abs(data[i][sr].val).toString(); data[i][sr].val=(parseInt(s.slice(0,-1))||0)*(data[i][sr].val<0?-1:1);}; if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
+    function doC() { data[ai][sr].val=0; data[ai][sr].rate=0; data[ai][sr].memo=""; data[ai][sr].isP=false; render(); }
+    function doMult() { const v=prompt("掛ける数"); if(v){ data[ai][sr].val*=parseFloat(v); render(); } }
+    function doOp(o) { const f=(i)=>data[i][sr].val=Math.abs(data[i][sr].val)*(o==='-'?-1:1); if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
+    function doAC() { if(confirm("全削除してよろしいですか？")) { data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render(); } }
+    function doCC() { data[ai].forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;}); render(); }
+
     init();
 </script>
 </body>
