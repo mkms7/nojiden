@@ -30,8 +30,18 @@
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
         
-        /* 合計表示バーを削除したためリストを広く使う */
-        .history-area { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        /* リストエリア（スクロールバー非表示） */
+        .history-area { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto; 
+            -ms-overflow-style: none;    /* IE, Edge用 */
+            scrollbar-width: none;       /* Firefox用 */
+        }
+        .history-area::-webkit-scrollbar { 
+            display: none;               /* Chrome, Safari用 */
+        }
         
         .history-item { 
             flex: 1; min-height: 60px; border-bottom: 1px solid rgba(0,0,0,0.05); 
@@ -49,8 +59,11 @@
         .btn { border-radius: var(--btn-radius); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
         .btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        .top-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; height: 55px; }
-        .func-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; height: 55px; }
+        /* ボタン連結用スタイル */
+        .joined-row { display: flex; height: 55px; }
+        .joined-row .btn { flex: 1; border-radius: 0; }
+        .joined-row .btn:first-child { border-top-left-radius: var(--btn-radius); border-bottom-left-radius: var(--btn-radius); }
+        .joined-row .btn:last-child { border-top-right-radius: var(--btn-radius); border-bottom-right-radius: var(--btn-radius); }
         
         .grid-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex-grow: 1; }
         
@@ -58,7 +71,7 @@
         .op-key { background: var(--key-op); color: white; font-size: 1.4rem; }
         .c-key { background: #cfd8dc; color: #37474f; font-size: 1.4rem; }
 
-        /* 還元表示エリア（ラベル削除、数字のみ） */
+        /* 還元エリア（数字のみ） */
         .reward-area { 
             background: #e1f5fe; border-radius: 12px; padding: 12px; 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
@@ -91,13 +104,13 @@
     </div>
 
     <div class="keypad-container" id="keypad">
-        <div class="top-row">
+        <div class="joined-row">
             <button class="btn" style="background:#b0bec5; color:#37474f;" onclick="openSet(true)">⚙</button>
             <button class="btn" style="background:#4db6ac;" onclick="doMemo()">🔍</button>
             <button class="btn" style="background:#000;" onclick="doP()" id="p-btn">P</button>
         </div>
         
-        <div class="func-row">
+        <div class="joined-row">
             <button class="btn" style="background:#1e88e5;" id="y-btn" onclick="doY()">横計算</button>
             <button class="btn" style="background:#7e57c2;" onclick="do4()">4連電卓</button>
             <button class="btn" style="background:#78909c;" onclick="toggleFS()">全画面</button>
@@ -234,7 +247,7 @@
 
     function doC() { data[ai][sr].val=0; data[ai][sr].rate=0; data[ai][sr].memo=""; data[ai][sr].isP=false; render(); }
     function doMult() { const v=prompt("数値を入力"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
-    function doOff() { const v=prompt("何%オフ？"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val * (1 - f/100)); render(); } } }
+    function doOff() { const v=prompt("何%オフにしますか？"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val * (1 - f/100)); render(); } } }
     function doOp(o) { const f=(i)=>data[i][sr].val=Math.abs(data[i][sr].val)*(o==='-'?-1:1); if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
     function doAC() { if(confirm("全削除してよろしいですか？")) { data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render(); } }
     function doCC() { data[ai].forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;}); render(); }
