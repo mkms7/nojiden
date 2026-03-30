@@ -24,14 +24,12 @@
         
         .app-container { display: flex; height: 100%; width: 100%; max-width: 1366px; padding: 12px; gap: 12px; }
         
-        
         .fs-active #keypad { display: none !important; }
         .fs-active #mainView { flex: 1; }
 
         .lists-view-port { flex: 1.2; overflow: hidden; position: relative; border-radius: 12px; background: var(--list-bg); }
         .lists-scroll-container { display: flex; height: 100%; width: 100%; gap: 1px; background: rgba(0,0,0,0.1); }
         .list-column { display: flex; flex-direction: column; flex: 1; min-width: 0; background: var(--list-bg); }
-        
         
         .col-total { 
             height: 55px; 
@@ -65,7 +63,6 @@
         .p-mark { font-size: 0.8rem; color: #fff; background: #000; border-radius: 4px; padding: 2px 5px; margin-right: 5px; font-weight: 900; }
         .memo-text { font-size: 0.85rem; color: #1565c0; position: absolute; left: 10px; top: 8px; font-weight: normal; }
 
-        
         #exit-fs-btn { 
             position: absolute; bottom: 30px; right: 30px; z-index: 6000; 
             background: #f44336; color: white; border: none; padding: 20px 35px; 
@@ -78,7 +75,6 @@
         .btn { border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: 0.1s; }
         .btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        
         .joined-row { display: flex; height: 55px; }
         .joined-row .btn { flex: 1; border-radius: 0; }
         .joined-row .btn:first-child { border-top-left-radius: var(--btn-radius); border-bottom-left-radius: var(--btn-radius); }
@@ -137,10 +133,25 @@
         </div>
 
         <div class="grid-keys">
-            <button class="btn num-key" onclick="dn(7)">7</button><button class="btn num-key" onclick="dn(8)">8</button><button class="btn num-key" onclick="dn(9)">9</button><button class="btn c-key" onclick="doC()">C</button>
-            <button class="btn num-key" onclick="dn(4)">4</button><button class="btn num-key" onclick="dn(5)">5</button><button class="btn num-key" onclick="dn(6)">6</button><button class="btn op-key" onclick="doMult()">×</button>
-            <button class="btn num-key" onclick="dn(1)">1</button><button class="btn num-key" onclick="dn(2)">2</button><button class="btn num-key" onclick="dn(3)">3</button><button class="btn op-key" onclick="doOff()">%</button>
-            <button class="btn num-key" onclick="dn(0)">0</button><button class="btn num-key" onclick="dn('00')">00</button><button class="btn op-key" onclick="doOp('+')">+</button><button class="btn op-key" onclick="doOp('-')">-</button>
+            <button class="btn num-key" onclick="dn(7)">7</button>
+            <button class="btn num-key" onclick="dn(8)">8</button>
+            <button class="btn num-key" onclick="dn(9)">9</button>
+            <button class="btn c-key" onclick="doBS()">BS</button>
+
+            <button class="btn num-key" onclick="dn(4)">4</button>
+            <button class="btn num-key" onclick="dn(5)">5</button>
+            <button class="btn num-key" onclick="dn(6)">6</button>
+            <button class="btn c-key" onclick="doC()">C</button>
+
+            <button class="btn num-key" onclick="dn(1)">1</button>
+            <button class="btn num-key" onclick="dn(2)">2</button>
+            <button class="btn num-key" onclick="dn(3)">3</button>
+            <button class="btn op-key" onclick="doMult()">×</button>
+
+            <button class="btn num-key" onclick="dn(0)">0</button>
+            <button class="btn num-key" onclick="dn('00')">00</button>
+            <button class="btn op-key" onclick="toggleSign()">±</button>
+            <button class="btn op-key" onclick="doOff()">%</button>
         </div>
 
         <div class="reward-area" id="rewardBox"></div>
@@ -155,7 +166,7 @@
 <div id="set-panel" class="settings-panel">
     <div class="modal-content">
         <div class="setting-section">
-            <div class="setting-title">表示設定</div>
+            <div class="setting-title">表示</div>
             <label style="color:white; display:flex; align-items:center; gap:10px;">
                 <input type="checkbox" id="boldCheck" onchange="setBold(this.checked)" style="width:20px; height:20px;"> 数字を太くする
             </label>
@@ -165,7 +176,7 @@
             <div class="color-grid" id="bgPalette"></div>
         </div>
         <div class="setting-section">
-            <div class="setting-title">還元率設定</div>
+            <div class="setting-title">還元率</div>
             <div class="rate-grid" id="rtPalette"></div>
         </div>
         <button class="btn" style="width:100%; height:50px; background:#fff; color:#000; border-radius:12px;" onclick="openSet(false)">閉じる</button>
@@ -232,9 +243,12 @@
                 const el = document.getElementById(`c-${i}-${j}`);
                 if(el) {
                     let h = `<div class="memo-text">${item.memo}</div>`;
-                    let v = item.val===0 ? "" : item.val.toLocaleString();
+                    
+                    const numColor = item.val < 0 ? "#f44336" : "#222";
+                    let v = item.val===0 ? "" : Math.abs(item.val).toLocaleString();
                     if(item.isP && item.val!==0) v = `<span class="p-mark">P</span>` + v;
-                    h += `<div>${v}</div>`;
+                    
+                    h += `<div style="color: ${numColor};">${item.val < 0 ? '-' : ''}${v}</div>`;
                     if(item.val!==0 && item.rate!==0) h += `<div style="font-size:0.65rem; color:#888;">${item.rate}%</div>`;
                     el.innerHTML = h; el.classList.toggle('selected-row', (i===ai && j===sr));
                 }
@@ -259,7 +273,6 @@
     function setBold(b) { if(b) document.getElementById('appBody').classList.add('bold-nums'); else document.getElementById('appBody').classList.remove('bold-nums'); localStorage.setItem('bld', b); }
     function openSet(s) { document.getElementById('set-panel').style.display = s?'flex':'none'; }
     
-    
     function toggleViewMode() {
         const app = document.getElementById('appContainer');
         const btn = document.getElementById('exit-fs-btn');
@@ -272,12 +285,48 @@
         }
     }
 
-    function doC() { data[ai][sr].val=0; data[ai][sr].rate=0; data[ai][sr].memo=""; data[ai][sr].isP=false; render(); }
+
+    function toggleSign() {
+        const f = (i) => data[i][sr].val = data[i][sr].val * -1;
+        if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render();
+    }
+
+    
+    function doBS() {
+        const f = (i) => {
+            let v = data[i][sr].val;
+            let s = v.toString();
+            if (s.length > 1) {
+                s = s.slice(0, -1);
+                if (s === "-" || s === "") s = "0";
+                data[i][sr].val = parseInt(s);
+            } else { data[i][sr].val = 0; }
+        };
+        if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render();
+    }
+
+    
+    function doC() {
+        const f = (i) => {
+            data[i][sr].val = 0; data[i][sr].rate = 0; data[i][sr].memo = ""; data[i][sr].isP = false;
+        };
+        if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render();
+    }
+
+    
+    function doAC() {
+        if(confirm("全削除してよろしいですか？")) {
+            data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render();
+        }
+    }
+
+    
+    function doCC() {
+        data[ai].forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;}); render();
+    }
+
     function doMult() { const v=prompt("数値"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val*f); render(); } } }
     function doOff() { const v=prompt("何%オフにしますか？"); if(v){ const f=parseFloat(v); if(!isNaN(f)) { data[ai][sr].val=Math.round(data[ai][sr].val * (1 - f/100)); render(); } } }
-    function doOp(o) { const f=(i)=>data[i][sr].val=Math.abs(data[i][sr].val)*(o==='-'?-1:1); if(iy) for(let i=ai;i<(i4?4:3);i++) f(i); else f(ai); render(); }
-    function doAC() { if(confirm("全削除してよろしいですか？")) { data.forEach(l=>l.forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;})); render(); } }
-    function doCC() { data[ai].forEach(x=>{x.val=0;x.isP=false;x.memo="";x.rate=0;}); render(); }
 
     init();
 </script>
